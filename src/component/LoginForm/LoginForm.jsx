@@ -2,12 +2,24 @@
 import React, { useState } from 'react';
 import './LoginForm.css';
 
-const LoginForm = ({ onSubmit, onForgotPassword }) => {
+function getFirstName(email) {
+  if (!email) return '';
+  const name = email.split('@')[0];
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+const LoginForm = ({
+  onSubmit,
+  onForgotPassword,
+  user: userProp,
+  onLogout,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [touched, setTouched] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [user, setUser] = useState(userProp || null);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,29 +42,73 @@ const LoginForm = ({ onSubmit, onForgotPassword }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid) {
-      onSubmit({
-        email: email.trim(),
-        password: password.trim(),
-        remember,
-      });
+      const userObj = { email: email.trim() };
+      setUser(userObj);
+      if (onSubmit) {
+        onSubmit({
+          email: email.trim(),
+          password: password.trim(),
+          remember,
+        });
+      }
     }
   };
 
+  const handleLogout = () => {
+    setUser(null);
+    setEmail('');
+    setPassword('');
+    setRemember(false);
+    setTouched({});
+    if (onLogout) onLogout();
+  };
+
+  // Show welcome message if user is present
+  if (user && user.email) {
+    return (
+      <div className="login-success" data-testid="login-success">
+        <h2>Welcome, {getFirstName(user.email)}!</h2>
+        <p>Your email: <strong>{user.email}</strong></p>
+        <button
+          type="button"
+          className="logout-btn"
+          data-testid="logout-btn"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <form className="login-form" onSubmit={handleSubmit} data-testid="login-form">
+    <form
+      className="login-form"
+      onSubmit={handleSubmit}
+      data-testid="login-form"
+      aria-label="Login form"
+      autoComplete="on"
+    >
       <h2>Login</h2>
 
       <label htmlFor="email">Email</label>
       <input
         id="email"
-        type="text"
+        type="email"
         placeholder="Enter your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onBlur={() => setTouched({ ...touched, email: true })}
         data-testid="email-input"
+        aria-invalid={!!(touched.email && emailError)}
+        aria-describedby="email-error"
+        autoComplete="username"
       />
-      {touched.email && emailError && <span className="error">{emailError}</span>}
+      {touched.email && emailError && (
+        <span className="error" id="email-error" data-testid="email-error">
+          {emailError}
+        </span>
+      )}
 
       <label htmlFor="password">Password</label>
       <div className="password-wrapper">
@@ -64,18 +120,25 @@ const LoginForm = ({ onSubmit, onForgotPassword }) => {
           onChange={(e) => setPassword(e.target.value)}
           onBlur={() => setTouched({ ...touched, password: true })}
           data-testid="password-input"
+          aria-invalid={!!(touched.password && passwordError)}
+          aria-describedby="password-error"
+          autoComplete="current-password"
         />
         <button
           type="button"
           className="toggle-btn"
           onClick={() => setShowPassword(!showPassword)}
           data-testid="toggle-password"
-          aria-label="Toggle password visibility"
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
         >
           {showPassword ? 'Hide' : 'Show'}
         </button>
       </div>
-      {touched.password && passwordError && <span className="error">{passwordError}</span>}
+      {touched.password && passwordError && (
+        <span className="error" id="password-error" data-testid="password-error">
+          {passwordError}
+        </span>
+      )}
 
       <div className="login-options">
         <label className="checkbox">
@@ -103,6 +166,7 @@ const LoginForm = ({ onSubmit, onForgotPassword }) => {
         disabled={!isFormValid}
         data-testid="submit-btn"
         className={isFormValid ? '' : 'disabled'}
+        aria-disabled={!isFormValid}
       >
         Login
       </button>
@@ -111,3 +175,4 @@ const LoginForm = ({ onSubmit, onForgotPassword }) => {
 };
 
 export default LoginForm;
+

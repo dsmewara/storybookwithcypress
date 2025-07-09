@@ -7,6 +7,8 @@
     "build-storybook": "storybook build",
     "test-storybook": "test-storybook",
     "cypress:open": "cypress open --component",
+    "cypress:run": "cypress run --component --config video=false",
+    "test:all": "cypress run --component --config video=false",
     "chromatic": "npx chromatic --project-token=chpt_51eb10db7ce011e --legacy-peer-deps"
   },
   "keywords": [],

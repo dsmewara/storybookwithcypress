@@ -336,4 +336,4 @@ In summary:
 4. Summary 
     Button component is reusable and customizable via props.
     Cypress component tests automatically check how the Button looks and works.
-    You can visually and automatically verify your UI is correct and reliable.git 
+    You can visually and automatically verify your UI is correct and reliable. 

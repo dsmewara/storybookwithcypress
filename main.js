@@ -1,25 +1,22 @@
 const path = require("path");
 
-// Helper to get absolute path of a package
-function getAbsolutePath(value) {
-  return path.dirname(require.resolve(path.join(value, "package.json")));
+// Helper function to get absolute path
+function getAbsolutePath(pkg) {
+  return path.dirname(require.resolve(path.join(pkg, "package.json")));
 }
 
 module.exports = {
-  stories: [
-    "../src/**/*.stories.@(js|jsx|ts|tsx|mdx)", // all story files
-  ],
+  stories: ["../src/**/*.stories.@(js|jsx|ts|tsx|mdx)"],
   addons: [
     {
       name: "@storybook/addon-docs",
       options: { transcludeMarkdown: true },
     },
-    getAbsolutePath("@storybook/addon-essentials"),
-    getAbsolutePath("@storybook/addon-webpack5-babel"), // if needed
-    "@chromatic/storybook",
+    "@storybook/addon-essentials",
+    "@chromatic/storybook"
   ],
   framework: {
-    name: getAbsolutePath("@storybook/react-webpack5"),
+    name: "@storybook/react-webpack5",
     options: {},
   },
   docs: {
@@ -29,7 +26,6 @@ module.exports = {
     reactDocgen: "react-docgen-typescript",
   },
   webpackFinal: async (config) => {
-    // Support TSX / JSX
     config.module.rules.push({
       test: /\.(ts|tsx)$/,
       use: [
@@ -38,10 +34,7 @@ module.exports = {
           options: {
             presets: [
               require.resolve("@babel/preset-env"),
-              [
-                require.resolve("@babel/preset-react"),
-                { runtime: "automatic" },
-              ],
+              [require.resolve("@babel/preset-react"), { runtime: "automatic" }],
               require.resolve("@babel/preset-typescript"),
             ],
           },
